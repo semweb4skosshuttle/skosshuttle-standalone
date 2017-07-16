@@ -1,5 +1,5 @@
 # Skos Shuttle standalone
-SKOS Shuttle - RDF based Thesaurus Management - https://skosshuttle.ch 
+Welcome to **SKOS Shuttle** - RDF based Thesaurus Management - https://skosshuttle.ch 
 
 The provided docker-compose file orchestrates a complete SKOS Shuttle standalone (in the following simply "SKOS Shutlle") for your site environment. It differs from the online service version, since it can process just one tenant.
 
