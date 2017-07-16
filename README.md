@@ -6,9 +6,9 @@ The provided docker-compose file orchestrates a complete SKOS Shuttle standalone
 **SKOS Shuttle is an application to maintain and use RDF/SKOS thesauri on the web.**
 
 All you need is a login to the (private) repository ch.semweb.ch:15476 - ask here for more informations
-
 The provided docker compose allows you to orchestrate a SKOS Shuttle working totally on HTTP or on HTTPS (SSL).
 
+You must have www.docker.com and https://docs.docker.com/compose/ installed on your environment.
 
 # Components of SKOS Shuttle standalone
 
@@ -23,7 +23,7 @@ Tomcat image with a Blazegraph module and a ready-to-use journal
 Tomcat application complete with API ready-to be used after correct initialization.
 
 # Preliminaries
-Please make sure your docker is running, you have docker-compose installed and you are logged in into the repository ch.semweb:15476 - then unzip the file and move it to your place.
+Please make sure your docker is running, you have docker-compose installed and you are logged in into the repository ch.semweb:15476 (*) - then unzip the file and move it to your place. You might want to use the unzipped folder structure instead of the file structure. cd to SKS_SA_COMPOSED and adapt files.
 
 Although the docker-compose-http.yml (HTTP-only) version should run immediately, it is a good way first to start one component, then the other and see whether they are communicating. The suggested sequence is:
 
