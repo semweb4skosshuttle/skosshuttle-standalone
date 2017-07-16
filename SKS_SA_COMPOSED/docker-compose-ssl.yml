@@ -1,0 +1,142 @@
+###################################################################################
+# Semweb LLC - Switzerland
+# Author: Fabio Ricci - fabio.ricci@semweb.ch
+# Date: July 2017
+# Subject: SKOS Shuttle standalone docker-compose.yml 
+# Please see/adapt values in .env file
+###################################################################################
+#
+# STRUCTURE:
+#
+#   dbs - Initialized database system with timezone
+#   sks - SKOS Shuttle on tomcat
+#   tps - RDF (Triple) Store on tomcat
+#
+# NOTES: 
+#
+#   1 You need an account to the private repository ch.semweb.ch:15476
+#   2 Please wait to login until sks has entered its RUNNING STATE (2-5 min)
+#   3 Attach /TRIPLESTORE in case a) you want to youse your Blazegraph Journal
+#                                 b) after first run to have a persistence of your RDF data
+#   4 Take care of the logs (deleting or zipping them at your discretion)
+#   5 Extract /TRIPLESTORE after first RUN to make it persistent
+#
+###################################################################################
+
+version: '3'
+
+services:
+
+  ###################################### 
+  # SKOS Shuttle Databases
+  dbs:
+  #  image: ch.semweb.ch:15476/sksdb
+    image                  : ch.semweb.ch:15476/sksdb
+    container_name         : dbs
+    environment:
+      MYSQL_ROOT_PASSWORD  : letmein #CHANGE THIS
+      MYSQL_ROOT_HOST      : 1
+      SKS_DBR_TOMPASS      : tompass
+      SKS_TUSER1PASS       : tuser1pass
+      SKS_TUSER2PASS       : tuser2pass
+      SKS_TUSER3PASS       : tuser3pass
+      SKS_MANAGER_NAME     : clarissa
+      SKS_MANAGER_PASS     : letmesee
+      SKS_USER1_NAME       : sksuser
+      SKS_USER1_PASS       : skspass
+      SKS_SERVER_NAME      : dockercomp
+      # set my timezone (from .env)
+      MYTIMEZONE           : $MYTIMEZONE
+      MYSQL_DATADIR        : $MYSQL_DEFAULT_DATADIR
+    volumes:
+      - ".env:/ENV/.env"
+      - "./persistence/dbs/conf:$MYSQL_DEFAULT_CONFDIR"
+      - "./persistence/dbs/data:$MYSQL_DEFAULT_DATADIR"
+      - "./persistence/dbs/logs:$MYSQL_DEFAULT_LOGDIR" 
+    ports:
+      - 3306:3306
+
+ 
+ ###################################### 
+  # Tomcat SKOS Shuttle.
+  sks_tomcat_node_1:
+    image                  : ch.semweb.ch:15476/sks
+    container_name         : sks
+    environment:
+      # set container timezone (from .env)
+      MYTIMEZONE           : $MYTIMEZONE
+      # instruct container on DOCKERHOST:
+      SKS_SERVER_BASEURL   : https://10.0.1.130:8181 #SKOS Shuttle IP
+      # Access mode for Triple Store tps_tomcat
+      DOCKERHOSTREPO_SCHEMA: https
+      DOCKERHOSTREPO_IP    : 10.0.1.130
+      DOCKERHOSTREPO_PORT  : "8087"
+       # config tomcat
+      SKS_DBR_TOMPASS      : tompass
+      SKS_TUSER1PASS       : tuser1pass
+      SKS_TUSER2PASS       : tuser2pass
+      SKS_TUSER3PASS       : tuser3pass
+      SKS_COMPRESSION      : "on"
+      SKS_SECURED          : 1
+      SKS_MANAGER_FR_OUTS  : 1
+      
+      #access TPS with credentials #in case TPS secured
+      TPS_SECURED          : 1
+      TPS_USER1_NAME       : blzuser
+      TPS_USER1_PASS       : blzpass
+      #SSL parameters
+      SKS_MAXTHREADS       : 1000
+      SKS_SSLENABLEDPROTS  : "TLSv1.1,TLSv1.2"
+      SKS_KEYSTOREFILE     : "webdomain.keystore.p12"
+      SKS_KEYSTORETYPE     : "PKCS12"
+      SKS_KEYSTOREPASS     : "yourkeystorepassword"
+      SKS_CIPHERS          : "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_3DES_EDE_CBC_SHA"
+      # want to debug:
+      REMOTE_DEBUG         : 1
+      # email behaviour
+    volumes:
+      - ".env:/ENV/.env"
+      - "./conf/tomcat/SSL:/TOMCAT/SVSSL" #add your SSL certificate/key/keystore here
+      - "./persistence/sks/logs:$TOMCAT_HOME/conf/logs"
+    links:
+      - dbs
+    ports:
+      - 8000:8000 # Remote debug port - should it be needed
+      - 8080:8080 # HTTP  PORT
+      - 8181:8181 # HTTPS PORT
+ 
+ 
+  ######################################
+  # triplestore server
+  tps_tomcat:
+    image: ch.semweb.ch:15476/sksblazegraph
+    container_name: tps
+    environment:
+      # set container timezone (from .env)
+      MYTIMEZONE           : $MYTIMEZONE
+      # config tomcat
+      TPS_COMPRESSION      : "on"
+      TPS_SECURED          : 1
+      TPS_MANAGER_NAME     : johndoe
+      TPS_MANAGER_PASS     : grantme
+      TPS_USER1_NAME       : blzuser
+      TPS_USER1_PASS       : blzpass
+      TPS_MANAGER_FR_OUTS  : 1
+      #SSL parameters
+      
+      TPS_MAXTHREADS       : 1000
+      TPS_SSLENABLEDPROTS  : "TLSv1.1,TLSv1.2"
+      TPS_KEYSTOREFILE     : "webdomain.keystore.p12"
+      TPS_KEYSTORETYPE     : "PKCS12"
+      TPS_KEYSTOREPASS     : "yourkeystorepassword"
+      TPS_CIPHERS          : "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,TLS_RSA_WITH_AES_128_CBC_SHA,TLS_RSA_WITH_AES_128_GCM_SHA256,TLS_RSA_WITH_3DES_EDE_CBC_SHA"
+      
+    volumes:
+      - ".env:/ENV/.env"
+      - "./conf/tomcat/SSL:$TOMCAT_HOME/conf/SVSSL" #add your SSL certificate here if needed
+      - "./persistence/tps/logs:$TOMCAT_HOME/logs"
+      - "./persistence/tps/TRIPLESTORE:/TRIPLESTORE"
+    ports:
+      - 8086:8080 # HTTP
+      - 8087:8181 # HTTPS
+ 
