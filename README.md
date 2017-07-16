@@ -52,3 +52,4 @@ To orchestrate SKOS Shuttle in SSL, copy docker-compose-ssl.yml to docker-compos
 2) The module sks generates under its volume a ready-to-use database to be reused at the next start
 3) The moduls sksblazegraph generates under its volume a Blazegraph journal in order to persist changes for the next start.
 4) There is no SSL for the database (mysql) and no load-balancing for sks / sksblazegraph (being the latters tomcats) - mysql (should not be exposed, therefore) needs no exposed ports and hence no SSL to protect it. Docker swarms technology can be used to balance the present tomcat modules (sks and sksblazegraph) opportunely. 
+5) and (*) Although ch.semweb.ch:15476 comes with a valid godaddy SSL certificate, DOCKER does not recognize it as safe, therefore it might alert you. In this case please add ch.semweb.ch:15476 to the list of "insecure registries" and you will be able to download every component.
