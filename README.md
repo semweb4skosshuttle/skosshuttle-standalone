@@ -23,7 +23,7 @@ Tomcat image with a Blazegraph module and a ready-to-use journal
 Tomcat application complete with API ready-to be used after correct initialization.
 
 # Preliminaries
-Please make sure your docker is running, you have docker-compose installed and you are logged in into the repository ch.semweb:15476 (*) - then unzip the file and move it to your place. You might want to use the unzipped folder structure instead of the file structure. cd to SKS_SA_COMPOSED and adapt files.
+Please make sure your docker is running, you have docker-compose installed and you are logged in into the repository ch.semweb:15476 (*) - then unzip the file and move it to your place. You might want to use the unzipped folder structure instead of the file structure (the zip is complete). cd to SKS_SA_COMPOSED and adapt files.
 
 Although the docker-compose-http.yml (HTTP-only) version should run immediately, it is a good way first to start one component, then the other and see whether they are communicating. The suggested sequence is:
 
@@ -50,6 +50,6 @@ To orchestrate SKOS Shuttle in SSL, copy docker-compose-ssl.yml to docker-compos
 
 1) SKOS Shuttle can work with any of the tested triplestores accessible from your network. 
 2) The module sks generates under its volume a ready-to-use database to be reused at the next start
-3) The moduls sksblazegraph generates under its volume a Blazegraph journal in order to persist changes for the next start.
+3) The module sksblazegraph generates under its volume a Blazegraph journal in order to persist changes for the next start.
 4) There is no SSL for the database (mysql) and no load-balancing for sks / sksblazegraph (being the latters tomcats) - mysql (should not be exposed, therefore) needs no exposed ports and hence no SSL to protect it. Docker swarms technology can be used to balance the present tomcat modules (sks and sksblazegraph) opportunely. 
 5) and (*) Although ch.semweb.ch:15476 comes with a valid godaddy SSL certificate, DOCKER does not recognize it as safe, therefore it might alert you. In this case please add ch.semweb.ch:15476 to the list of "insecure registries" and you will be able to download every component.
